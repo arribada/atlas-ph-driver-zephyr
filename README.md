@@ -1,4 +1,4 @@
-# atlas-ec-driver-zephyr
+# atlas-ph-driver-zephyr
 
 ## Hardware connections
 We are connecting the Atlast breakout on i2c0 of the Pico
