@@ -1,0 +1,10 @@
+# Copyright (c) 2025 Arribada Initiative CIC
+# SPDX-License-Identifier: MIT
+description: Atlas OEM-EC control board
+
+compatible: "atlas,oemec"
+
+include: [sensor-device.yaml, i2c-device.yaml]
+
+
+# TODO - add int-gpios/sqw, clock, etc.

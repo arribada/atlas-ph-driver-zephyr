@@ -1,0 +1,12 @@
+&i2c0{
+	clock-frequency = <I2C_BITRATE_STANDARD>;
+	status = "okay";
+	pinctrl-0 = <&i2c0_default>;
+	pinctrl-names = "default";
+oemec:oemec@64{
+		compatible = "atlas,oemec";
+		status = "okay";
+		reg = <0x64>;
+	};
+ };
+		
