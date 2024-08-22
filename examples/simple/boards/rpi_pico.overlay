@@ -3,10 +3,10 @@
 	status = "okay";
 	pinctrl-0 = <&i2c0_default>;
 	pinctrl-names = "default";
-oemec:oemec@64{
-		compatible = "atlas,oemec";
+oemph:oemph@65{
+		compatible = "atlas,oemph";
 		status = "okay";
-		reg = <0x64>;
+		reg = <0x65>;
 	};
  };
 		

@@ -24,4 +24,4 @@ manifest:
           - hal_rpi_pico
 
   self:
-    path: atlas-driver-zephyr
+    path: atlas-ph-driver-zephyr

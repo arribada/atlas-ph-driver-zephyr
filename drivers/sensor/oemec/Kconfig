@@ -1,7 +1,0 @@
-menuconfig OEMEC
-    bool "Enable OEMEC"
-    default y
-    depends on DT_HAS_ATLAS_OEMEC_ENABLED
-    select I2C
-    help
-	OEM EC sensor from Atlas

@@ -1,8 +1,8 @@
 # Copyright (c) 2025 Arribada Initiative CIC
 # SPDX-License-Identifier: MIT
-description: Atlas OEM-EC control board
+description: Atlas OEM-PH control board
 
-compatible: "atlas,oemec"
+compatible: "atlas,oemph"
 
 include: [sensor-device.yaml, i2c-device.yaml]
 

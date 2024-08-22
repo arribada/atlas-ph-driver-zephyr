@@ -1,0 +1,7 @@
+menuconfig OEMPH
+    bool "Enable OEMPH"
+    default y
+    depends on DT_HAS_ATLAS_OEMPH_ENABLED
+    select I2C
+    help
+	OEM PH sensor from Atlas
