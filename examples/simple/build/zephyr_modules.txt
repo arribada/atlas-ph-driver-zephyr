@@ -1,3 +1,0 @@
-"atlas-driver-zephyr":"/home/anuj/arribada/atlas-workplace/atlas-driver-zephyr":"/home/anuj/arribada/atlas-workplace/atlas-driver-zephyr"
-"cmsis":"/home/anuj/arribada/atlas-workplace/modules/hal/cmsis":"${ZEPHYR_CMSIS_CMAKE_DIR}"
-"hal_rpi_pico":"/home/anuj/arribada/atlas-workplace/modules/hal/rpi_pico":"${ZEPHYR_HAL_RPI_PICO_CMAKE_DIR}"

@@ -1,3 +1,0 @@
-/home/anuj/arribada/atlas-workplace/atlas-driver-zephyr/examples/simple/build/bootloader/CMakeFiles/boot_stage2.dir
-/home/anuj/arribada/atlas-workplace/atlas-driver-zephyr/examples/simple/build/bootloader/CMakeFiles/edit_cache.dir
-/home/anuj/arribada/atlas-workplace/atlas-driver-zephyr/examples/simple/build/bootloader/CMakeFiles/rebuild_cache.dir

@@ -1,7 +1,0 @@
-# ninja log v5
-0	15	1710662852364277267	CMakeFiles/boot_stage2.dir/home/anuj/arribada/atlas-workplace/modules/hal/rpi_pico/src/rp2_common/boot_stage2/boot2_w25q080.S.obj	65eb91fee5b4fab1
-16	268	1710662852613443868	boot_stage2	3b4b2667a84ba826
-16	268	1710662852613443868	boot_stage2.bin	3b4b2667a84ba826
-16	268	1710662852613443868	boot_stage2.S	3b4b2667a84ba826
-16	268	1710662852613443868	/home/anuj/arribada/atlas-workplace/atlas-driver-zephyr/examples/simple/build/bootloader/boot_stage2.bin	3b4b2667a84ba826
-16	268	1710662852613443868	/home/anuj/arribada/atlas-workplace/atlas-driver-zephyr/examples/simple/build/bootloader/boot_stage2.S	3b4b2667a84ba826
