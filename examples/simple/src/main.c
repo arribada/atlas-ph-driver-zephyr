@@ -18,8 +18,8 @@ int main(void)
 	}
 	LOG_INF("Setting attributes");
 
-	struct sensor_value conductivity;
-	sensor_attr_set(dev,SENSOR_CHAN_OEMPH_CONDUCTIVITY,SENSOR_ATTR_OEMPH_PROBE,&conductivity);
+	struct sensor_value ph;
+	sensor_attr_set(dev,SENSOR_CHAN_OEMPH_PH,SENSOR_ATTR_OEMPH_PROBE,&ph);
 	while (true) {
 		rc = sensor_sample_fetch(dev);
 		if (rc != 0 ){
@@ -27,8 +27,8 @@ int main(void)
 			break;
 		}
 		else { // read channels
-			rc = sensor_channel_get(dev, SENSOR_CHAN_OEMPH_CONDUCTIVITY, &conductivity);
-		        LOG_INF("Conductivity value %f", sensor_value_to_double(&conductivity));
+			rc = sensor_channel_get(dev, SENSOR_CHAN_OEMPH_PH, &ph);
+		        LOG_INF("PH value %f", sensor_value_to_double(&ph));
 		}
 		k_msleep(2000);
 	}
