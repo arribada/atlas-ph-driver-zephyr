@@ -16,10 +16,10 @@ int main(void)
 		LOG_INF("No device found");
 		return 0;
 	}
-	LOG_INF("Setting attributes");	
+	LOG_INF("Setting attributes");
 
 	struct sensor_value conductivity;
-	sensor_attr_set(dev,SENSOR_CHAN_OEMPH_CONDUCTIVITY,SENSOR_ATTR_OEMPH_PROBE,conductivity);
+	sensor_attr_set(dev,SENSOR_CHAN_OEMPH_CONDUCTIVITY,SENSOR_ATTR_OEMPH_PROBE,&conductivity);
 	while (true) {
 		rc = sensor_sample_fetch(dev);
 		if (rc != 0 ){
