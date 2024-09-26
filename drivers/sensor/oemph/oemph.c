@@ -41,140 +41,185 @@ LOG_MODULE_REGISTER(OEMPH, CONFIG_SENSOR_LOG_LEVEL);
 #define OEMPH_SENSOR_LOW_BYTE     0x18
 #define OEMPH_SENSOR_LSB          0x19
 
+enum CALIB_TYPES {
+  CALIB_CLEAR,
+  CALIB_LOW,
+  CALIB_MID,
+  CALIB_HIGH,
+};
+
+static int oemph_set_calibration(const struct device *dev,const struct sensor_value *val,enum CALIB_TYPES type);
+
 struct oemph_config {
-	struct i2c_dt_spec bus;
-	/* uint8_t resolution; */
-	/* uint8_t mtreg; */
+  struct i2c_dt_spec bus;
+  /* uint8_t resolution; */
+  /* uint8_t mtreg; */
 };
 
 struct oemph_data {
-	float sample;
+  float sample;
 };
 
 static int oemph_read_regs(const struct device *dev, uint8_t addr, void *buf, size_t len)
 {
-	const struct oemph_config *config = dev->config;
-	int err;
+  const struct oemph_config *config = dev->config;
+  int err;
 
-	err = i2c_write_read_dt(&config->bus, &addr, sizeof(addr), buf, len);
-	if (err != 0) {
-		LOG_ERR("failed to read reg addr 0x%02x, len %d (err %d)", addr, len, err);
-		return err;
-	}
+  err = i2c_write_read_dt(&config->bus, &addr, sizeof(addr), buf, len);
+  if (err != 0) {
+    LOG_ERR("failed to read reg addr 0x%02x, len %d (err %d)", addr, len, err);
+    return err;
+  }
 
-	return 0;
+  return 0;
 }
 
 static int oemph_write_regs(const struct device *dev, uint8_t addr, void *buf, size_t len)
 {
-	const struct oemph_config *config = dev->config;
-	uint8_t block[sizeof(addr) + len];
-	int err;
+  const struct oemph_config *config = dev->config;
+  uint8_t block[sizeof(addr) + len];
+  int err;
 
-	block[0] = addr;
-	memcpy(&block[1], buf, len);
+  block[0] = addr;
+  memcpy(&block[1], buf, len);
 
-	err = i2c_write_dt(&config->bus, block, sizeof(block));
-	if (err != 0) {
-		LOG_ERR("failed to write reg addr 0x%02x, len %d (err %d)", addr, len, err);
-		return err;
-	}
+  err = i2c_write_dt(&config->bus, block, sizeof(block));
+  if (err != 0) {
+    LOG_ERR("failed to write reg addr 0x%02x, len %d (err %d)", addr, len, err);
+    return err;
+  }
 
-	return 0;
+  return 0;
 }
 
 static int oemph_sample_fetch(const struct device *dev, enum sensor_channel chan)
 {
-	LOG_INF("Fetching samples");	
-	/* Initiate sensor read */
+  LOG_INF("Fetching samples");
+  /* Initiate sensor read */
 
-	/* uint8_t devicetype_firmware[2]={0,0}; */
-	/* oemph_read_regs(dev,OEMPH_DEVICE_TYPE,&devicetype_firmware,sizeof(devicetype_firmware)); */
-	/* LOG_INF("Device type : %d",devicetype_firmware[0]); */
-	/* LOG_INF("FW version  : %d", devicetype_firmware[1]); */
+  /* uint8_t devicetype_firmware[2]={0,0}; */
+  /* oemph_read_regs(dev,OEMPH_DEVICE_TYPE,&devicetype_firmware,sizeof(devicetype_firmware)); */
+  /* LOG_INF("Device type : %d",devicetype_firmware[0]); */
+  /* LOG_INF("FW version  : %d", devicetype_firmware[1]); */
 
-	/* Get the values */
+  /* Get the values */
 
-	uint8_t sensor_values[4]={1,2,3,4};
-	unsigned long sensor_values_long=0;
-	float sensor_values_float;
-	oemph_read_regs(dev,OEMPH_SENSOR_MSB,&sensor_values,sizeof(sensor_values));
+  uint8_t sensor_values[4]={1,2,3,4};
+  unsigned long sensor_values_long=0;
+  float sensor_values_float;
+  oemph_read_regs(dev,OEMPH_SENSOR_MSB,&sensor_values,sizeof(sensor_values));
 
-	sensor_values_long += sensor_values[0] << 24;
-	sensor_values_long += sensor_values[1] << 16;
-	sensor_values_long += sensor_values[2] << 8;
-	sensor_values_long += sensor_values[3];
+  sensor_values_long += sensor_values[0] << 24;
+  sensor_values_long += sensor_values[1] << 16;
+  sensor_values_long += sensor_values[2] << 8;
+  sensor_values_long += sensor_values[3];
 
-	sensor_values_float = (float)sensor_values_long;
-	sensor_values_float = sensor_values_float/100;
-	
-	LOG_INF("Sensor values as 4 regs :%x %x %x %x",sensor_values[0],sensor_values[1],sensor_values[2],sensor_values[3]);
-	LOG_INF("Sensor value as long %lu",sensor_values_long);
-	LOG_INF("Sensor value as float %f",sensor_values_float);
-	
-	return 0;
+  sensor_values_float = (float)sensor_values_long;
+  sensor_values_float = sensor_values_float/100;
+
+  LOG_INF("Sensor values as 4 regs :%x %x %x %x",sensor_values[0],sensor_values[1],sensor_values[2],sensor_values[3]);
+  LOG_INF("Sensor value as long %lu",sensor_values_long);
+  LOG_INF("Sensor value as float %f",sensor_values_float);
+
+  return 0;
 }
 
-static int oemph_set_probe()
+static int oemph_set_calibration(const struct device *dev,const struct sensor_value *val,enum CALIB_TYPES type)
 {
-	return 0;
-}
+  if(type!=CALIB_CLEAR){ // if we are clearing, no need to write anything to calib value register
 
-static int oemph_set_calibration()
-{
-	return 0;
+    uint32_t t = (uint32_t)val->val1;
+
+    uint8_t MSB = ((t & 0xFF000000) >>24);
+    uint8_t highbyte = ((t & 0x00FF0000) >>16);
+    uint8_t lowbyte = ((t & 0x0000FF00) >>8);
+    uint8_t LSB = (t & 0x000000FF);
+    LOG_INF("Setting calibration regs to %d i.e. | %02x | %02x | %02x | %02x",t,MSB,highbyte,lowbyte,LSB);
+    oemph_write_regs(dev,OEMPH_CALIB_MSB,&MSB,sizeof(MSB));
+    oemph_write_regs(dev,OEMPH_CALIB_HIGH_BYTE,&highbyte,sizeof(highbyte));
+    oemph_write_regs(dev,OEMPH_CALIB_LOW_BYTE,&lowbyte,sizeof(lowbyte));
+    oemph_write_regs(dev,OEMPH_CALIB_LSB,&LSB,sizeof(LSB));
+  }
+  uint8_t cr_value;
+  switch (type){
+  case CALIB_CLEAR:
+    cr_value = 1;
+    break;
+  case CALIB_LOW:
+    cr_value = 2;
+    break;
+  case CALIB_MID:
+    cr_value = 3;
+    break;
+  case CALIB_HIGH:
+    cr_value = 4;
+    break;
+  default:
+    LOG_ERR("Unexpected calibration type!");
+    return -1;
+  }
+  // write to request register
+  oemph_write_regs(dev,OEMPH_CALIB_REQUEST,&cr_value,sizeof(cr_value));
+
+  // todo read from calibration confirmation register
+
+  return 0;
 }
 
 static int oemph_channel_get(const struct device *dev, enum sensor_channel chan,
-			     struct sensor_value *val)
+           struct sensor_value *val)
 {
-	LOG_INF("Fetching value for channel %d", chan);
-	return 0;
+  LOG_INF("Fetching value for channel %d", chan);
+  return 0;
 }
 
 static int oemph_attr_get(const struct device *dev, enum sensor_channel chan,
-			   enum sensor_attribute attr, struct sensor_value *val)
+         enum sensor_attribute attr, struct sensor_value *val)
 {
-	return 0;
+  return 0;
 }
 
 static int oemph_attr_set(const struct device *dev, enum sensor_channel chan,
-			  enum sensor_attribute attr, const struct sensor_value *val)
+        enum sensor_attribute attr, const struct sensor_value *val)
 {
-	switch(attr){
-	case SENSOR_ATTR_CALIBRATION:
-		return oemph_set_calibration();
-	case SENSOR_ATTR_OEMPH_PROBE:
-		return oemph_set_probe();
-	default:
-		LOG_ERR("Attribute not supported");
-		return -ENOTSUP;
-		
-	}
-	return 0;
+  switch((int)attr){
+  case SENSOR_ATTR_OEMPH_CALIBRATION_CLEAR:
+    return oemph_set_calibration(dev,NULL,CALIB_CLEAR);
+  case SENSOR_ATTR_OEMPH_CALIBRATION_LOW:
+    return oemph_set_calibration(dev,val,CALIB_LOW);
+  case SENSOR_ATTR_OEMPH_CALIBRATION_MID:
+    return oemph_set_calibration(dev,val,CALIB_MID);
+  case SENSOR_ATTR_OEMPH_CALIBRATION_HIGH:
+    return oemph_set_calibration(dev,val,CALIB_HIGH);
+  default:
+    LOG_ERR("Attribute not supported");
+    return -ENOTSUP;
+
+  }
+  return 0;
 }
 
 static const struct sensor_driver_api oemph_driver_api = {
-	.sample_fetch = oemph_sample_fetch,
-	.channel_get = oemph_channel_get,
-	.attr_set = oemph_attr_set,
-	.attr_get = oemph_attr_get,
+  .sample_fetch = oemph_sample_fetch,
+  .channel_get = oemph_channel_get,
+  .attr_set = oemph_attr_set,
+  .attr_get = oemph_attr_get,
 };
 
 static int oemph_init(const struct device *dev)
 {
-	LOG_DBG("Inside oemph_init");
-	return 0;
+  LOG_DBG("Inside oemph_init");
+  return 0;
 }
 
 #define DEFINE_OEMPH(inst)                                                                         \
-	static struct oemph_data oemph_data_##inst;                                                \
+  static struct oemph_data oemph_data_##inst;                                                \
                                                                                                    \
-	static const struct oemph_config oemph_config_##inst = {                                   \
-		.bus = I2C_DT_SPEC_INST_GET(inst),                                                 \
-	};                                                                                         \
-	SENSOR_DEVICE_DT_INST_DEFINE(inst, oemph_init, NULL, &oemph_data_##inst,                   \
-				     &oemph_config_##inst, POST_KERNEL,                            \
-				     CONFIG_SENSOR_INIT_PRIORITY, &oemph_driver_api);
+  static const struct oemph_config oemph_config_##inst = {                                   \
+    .bus = I2C_DT_SPEC_INST_GET(inst),                                                 \
+  };                                                                                         \
+  SENSOR_DEVICE_DT_INST_DEFINE(inst, oemph_init, NULL, &oemph_data_##inst,                   \
+             &oemph_config_##inst, POST_KERNEL,                            \
+             CONFIG_SENSOR_INIT_PRIORITY, &oemph_driver_api);
 
 DT_INST_FOREACH_STATUS_OKAY(DEFINE_OEMPH)
